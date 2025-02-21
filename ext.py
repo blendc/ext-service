@@ -89,12 +89,6 @@ class AdvancedRouter(list):
     def options(self, uri_template, route_name=None, **options):
         return self.add(uri_template, methods=["OPTIONS"], route_name=route_name, **options)
 
-    def __call__(self, uri_template, methods, route_name=None, **options):
-        return self.add(uri_template, methods, route_name=route_name, **options)
-
-    def generate_url(self, route_name, *args, **kwargs):
-        return self.route_dict.get(route_name, "#unknown").format(*args, **kwargs)
-
 
 class JSONResponseRouter(AdvancedRouter):
     def modify_response(self, response, **options):
