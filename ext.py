@@ -4,75 +4,10 @@ from webob.dec import wsgify
 
 __all__ = ("AdvancedRouter",)
 
-def basic_pattern():
-    return r"[^/]+"
 
-
-def alphanumeric_only():
-    return r"[a-zA-Z0-9_]+"
-
-
-def year_in_four_digits():
-    return r"\d{4}"
-
-
-def two_digit_month():
-    return r"1[0-2]|0[1-9]"
-
-
-def two_digit_day():
-    return r"0[1-9]|[12][0-9]|3[01]"
-
-
-def hyphenated_slug():
-    return r"[\w-]+"
-
-
-def email_format():
-    return r"[\w.@+-]+"
-
-
-def full_email_address():
-    return r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]{2,})"
-
-
-def catch_all_path():
-    return r"[^/].*?"
-
-
-def unique_identifier():
-    return r"[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}"
-
-
-def numeric_value(signed=False, size=None):
-    sign = "[-+]?" if signed else ""
-    length_specifier = f"{{{size}}}" if size else "+"
-    return rf"{sign}\d{length_specifier}"
-
-
-def decimal_value(signed=False):
-    sign = "[-+]?" if signed else ""
-    return rf"{sign}[0-9]*\.?[0-9]+"
-
-
-def combined_patterns(*patterns):
-    return r"|".join(patterns)
-
-
-def custom_expression(regex):
-    return regex
-
-
-def short_identifier_code():
-    return r"[2-9A-HJ-NP-Za-km-z]{22}"
-
-
-def alphabet_only():
-    return r"[a-zA-Z]+"
-
-
-def hex_string():
-    return r"[0-9a-fA-F]+"
+regex = {
+    "shortuuid": r"[2-9A-HJ-NP-Za-km-z]{22}",
+}
 
 
 class FlexibleDict(dict):
@@ -175,7 +110,6 @@ class CallbackRegistry(list):
         def callback_decorator(callback):
             self.append(callback)
             return callback
-
         return callback_decorator
 
 
@@ -191,7 +125,6 @@ def convert_template_to_regex(template):
         """,
         re.VERBOSE,
     )
-
     for match in var_pattern.finditer(template):
         regex += re.escape(template[last_pos: match.start()])
         var_name = match.group(1)
@@ -200,15 +133,12 @@ def convert_template_to_regex(template):
         args = [x.strip() for x in extra_args.split(",") if len(x.split("=")) == 1] if extra_args else ()
         kwargs = dict([[x.strip() for x in x.split("=")] for x in extra_args.split(",") if
                        len(x.split("=")) == 2]) if extra_args else {}
-
         pattern_func = globals().get(f"{type_of_var}_only")
         if not pattern_func:
             raise KeyError(f"Unknown pattern type {type_of_var}")
-
         expr = f"(?P<{var_name}>{pattern_func(*args, **kwargs)})"
         regex += expr
         last_pos = match.end()
-
     regex += re.escape(template[last_pos:])
     regex = "^%s$" % regex
     return regex
@@ -226,7 +156,6 @@ def convert_template_to_string(template):
         """,
         re.VERBOSE,
     )
-
     for match in var_pattern.finditer(template):
         result_string += template[last_pos: match.start()]
         var_name = match.group(1)
