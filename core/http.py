@@ -1,5 +1,5 @@
 import logging
-import funcy as fn
+import funcy as fu
 from webob import Response, exc
 import ext
 from ext import JSONResponseRouter
@@ -72,7 +72,7 @@ def request_bad_gateway(**kwargs):
     _raise_error(exc.HTTPBadGateway, _default_msg="Bad Gateway", **kwargs)
 
 
-@fn.decorator
+@fu.decorator
 def verify_json(call):
     try:
         call.req.json
@@ -81,13 +81,13 @@ def verify_json(call):
     return call()
 
 
-@fn.decorator
+@fu.decorator
 def response_no_content(call):
     call()
     return Response(status=204)
 
 
-@fn.decorator
+@fu.decorator
 def response_created(call):
     call()
     return Response(status=201)

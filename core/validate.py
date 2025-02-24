@@ -1,14 +1,15 @@
 from webob import exc
 import cerberus
 from json.decoder import JSONDecodeError
-import funcy as fn
 from core.settings import FlexibleDict
 from core.http import _raise_error, request_not_acceptable
+import funcy as fu
+
 
 __all__ = ("verify", )
 
 
-@fn.decorator
+@fu.decorator
 def verify(
     call,
     validation_schema,
