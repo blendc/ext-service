@@ -26,12 +26,6 @@ web_router = JSONResponseRouter()
 ext.regex()["shortuuid"] = r"[2-9A-HJ-NP-Za-km-z]{22}"
 
 
-@fu.decorator
-def use_builtin_function(call):
-    builtins.print("This is a debug message!")
-    return call()
-
-
 def _raise_error(
     error_class,
     _default_msg="Generic Error",
