@@ -1,0 +1,48 @@
+# Production configuration
+
+# Server settings
+HOST: "0.0.0.0"
+PORT: 8000
+DEBUG: false
+SECRET_KEY: "${SECRET_KEY}"  # Set this in environment variables
+ALLOWED_HOSTS: "${ALLOWED_HOSTS}"  # Set this in environment variables
+
+# Database settings
+DB_NAME: "${DB_NAME}"
+DB_USER: "${DB_USER}"
+DB_PASSWORD: "${DB_PASSWORD}"
+DB_HOST: "${DB_HOST}"
+DB_PORT: "${DB_PORT}"
+DB_MAX_CONNECTIONS: 20
+DB_STALE_TIMEOUT: 300
+
+# Redis settings
+REDIS_URL: "${REDIS_URL}"
+
+# JWT settings
+JWT_SECRET: "${JWT_SECRET}"  # Set this in environment variables
+JWT_ALGORITHM: "HS256"
+JWT_EXPIRATION: 3600  # 1 hour
+
+# Logging settings
+LOG_LEVEL: "INFO"
+LOG_FORMAT: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Rate limiting
+RATE_LIMIT_ENABLED: true
+RATE_LIMIT_DEFAULT: 100  # requests per minute
+
+# Caching
+CACHE_ENABLED: true
+CACHE_DEFAULT_TIMEOUT: 300  # 5 minutes
+
+# Metrics
+METRICS_PORT: 8001
+
+# Sentry
+SENTRY_DSN: "${SENTRY_DSN}"  # Set this in environment variables
+
+# API documentation
+API_TITLE: "ext-service API"
+API_VERSION: "1.0.0"
+API_DESCRIPTION: "A lightweight, flexible web service framework for building high-performance RESTful APIs and microservices." 
