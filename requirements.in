@@ -7,5 +7,22 @@ webob
 peewee
 peewee-migrate
 gevent
+pyjwt
+redis
+marshmallow
+pyyaml
+python-dotenv
+gunicorn
+pytest
+pytest-cov
+black
+isort
+flake8
+mypy
+requests
+aiohttp
+uvicorn
+sentry-sdk
+prometheus-client
 
 
