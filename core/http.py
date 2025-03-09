@@ -20,10 +20,11 @@ __all__ = (
     "verify_json",
     "response_no_content",
     "response_created",
+    "response_ok",
 )
 
 web_router = JSONResponseRouter()
-ext.regex()["shortuuid"] = r"[2-9A-HJ-NP-Za-km-z]{22}"
+# ext.regex()["shortuuid"] = r"[2-9A-HJ-NP-Za-km-z]{22}"
 
 
 def _raise_error(
@@ -79,6 +80,24 @@ def verify_json(call):
     except:
         request_not_acceptable(custom_error="Invalid JSON request")
     return call()
+
+
+def response_ok(data, status=200):
+    """
+    Return a successful response with the given data.
+    
+    Args:
+        data: Data to include in the response
+        status: HTTP status code (default: 200)
+        
+    Returns:
+        Response: Response object
+    """
+    return Response(
+        json_body=data,
+        content_type="application/json",
+        status=status
+    )
 
 
 @fu.decorator
