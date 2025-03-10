@@ -1,6 +1,6 @@
 # ext-service
 
-A lightweight, flexible web service framework for building high-performance APIs, microservices, and more.
+A lightweight, flexible web service for building high-performance APIs, microservices, and more.
 
 ## Features
 
