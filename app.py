@@ -1,4 +1,3 @@
-
 import logging
 import os
 import sys
@@ -176,19 +175,19 @@ def openapi(req):
 @db_connection
 def register_user(req):
     data = req.data
-    
+
     if User.get_or_none(User.username == data.username):
         return response_ok({"error": "Username already exists"}, status=409)
-    
+
     if User.get_or_none(User.email == data.email):
         return response_ok({"error": "Email already exists"}, status=409)
-    
+
     user = User.create(
         username=data.username,
         email=data.email,
         password_hash=data.password,
     )
-    
+
     return response_created(UserSchema.serialize_one(user))
 
 
@@ -230,14 +229,14 @@ def register_user(req):
 @db_connection
 def login(req):
     data = req.data
-    
+
     user = User.get_or_none(User.username == data.username)
-    
+
     if not user or user.password_hash != data.password:
         return response_ok({"error": "Invalid credentials"}, status=401)
-    
+
     token = create_token(user.id, roles=["user"])
-    
+
     return response_ok({
         "token": token,
         "user": {
@@ -283,9 +282,9 @@ def login(req):
 @db_connection
 def get_tasks(req):
     user_id = req.user_id
-    
+
     tasks = Task.select().where(Task.user_id == user_id)
-    
+
     return response_ok(TaskSchema.serialize_many(tasks))
 
 
@@ -326,16 +325,16 @@ def get_tasks(req):
 @db_connection
 def create_task(req):
     data = req.data
-    
+
     user_id = req.user_id
-    
+
     task = Task.create(
         title=data.title,
         description=data.description,
         is_completed=data.is_completed,
         user_id=user_id,
     )
-    
+
     return response_created(TaskSchema.serialize_one(task))
 
 
@@ -372,12 +371,12 @@ def create_task(req):
 @db_connection
 def get_task(req, task_id):
     user_id = req.user_id
-    
+
     task = Task.get_or_none(Task.id == task_id, Task.user_id == user_id)
-    
+
     if not task:
         return response_ok({"error": "Task not found"}, status=404)
-    
+
     return response_ok(TaskSchema.serialize_one(task))
 
 
@@ -421,18 +420,18 @@ def update_task(req, task_id):
     data = req.data
 
     user_id = req.user_id
-    
+
     task = Task.get_or_none(Task.id == task_id, Task.user_id == user_id)
-    
+
     if not task:
         return response_ok({"error": "Task not found"}, status=404)
-    
+
     task.title = data.title
     task.description = data.description
     task.is_completed = data.is_completed
     task.updated_at = datetime.now()
     task.save()
-    
+
     return response_ok(TaskSchema.serialize_one(task))
 
 
@@ -453,14 +452,14 @@ def update_task(req, task_id):
 @db_connection
 def delete_task(req, task_id):
     user_id = req.user_id
-    
+
     task = Task.get_or_none(Task.id == task_id, Task.user_id == user_id)
-    
+
     if not task:
         return response_ok({"error": "Task not found"}, status=404)
-    
+
     task.delete_instance()
-    
+
     return response_no_content()
 
 
@@ -498,7 +497,7 @@ def delete_task(req, task_id):
 @db_connection
 def get_all_users(req):
     users = User.select()
-    
+
     return response_ok(UserSchema.serialize_many(users))
 
 
@@ -518,6 +517,7 @@ def get_all_users(req):
 def init_db():
     create_tables(User, Task)
 
+
 #     create_admin_user()
 
 
@@ -529,17 +529,17 @@ def main():
     print("Setting up metrics...")
     setup_metrics(port=8001)
     print("Metrics setup complete!")
-    
+
     from wsgiref.simple_server import make_server
-    
+
     host = settings.HOST
     port = settings.PORT
-    
+
     print(f"Starting server at http://{host}:{port}")
     print(f"API documentation available at http://{host}:{port}/docs")
     print(f"Metrics available at http://{host}:8001")
     print("\nPress Ctrl+C to stop the server")
-    
+
     try:
         server = make_server(host, port, router.app)
         server.serve_forever()

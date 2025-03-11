@@ -33,4 +33,12 @@ METRICS_PORT: 8001
 
 API_TITLE: "ext-service API (Development)"
 API_VERSION: "1.0.0"
-API_DESCRIPTION: "A lightweight, flexible web service for building high-performance APIs, microservices and more"
+API_DESCRIPTION: "A lightweight routin, flexible web service for building high-performance APIs, microservices and more"
+
+SERVICE_NAME: "ext-service"
+RPC_TIMEOUT: 10.0
+RPC_MAX_RETRIES: 3
+RPC_RETRY_DELAY: 0.5
+
+USER_SERVICE_URL: "http://localhost:8000"
+TASK_SERVICE_URL: "http://localhost:8001"

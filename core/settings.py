@@ -64,6 +64,14 @@ class Settings(FlexibleDict):
         
         self.SENTRY_DSN = os.getenv("SENTRY_DSN", "")
         
+        self.RPC_TIMEOUT = float(os.getenv("RPC_TIMEOUT", "10.0"))
+        self.RPC_MAX_RETRIES = int(os.getenv("RPC_MAX_RETRIES", "3"))
+        self.RPC_RETRY_DELAY = float(os.getenv("RPC_RETRY_DELAY", "0.5"))
+        self.SERVICE_NAME = os.getenv("SERVICE_NAME", "ext-service")
+
+        self.USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
+        self.TASK_SERVICE_URL = os.getenv("TASK_SERVICE_URL", "http://localhost:8001")
+        
         for key, value in config.items():
             self[key.upper()] = value
     
