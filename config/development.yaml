@@ -1,12 +1,12 @@
-HOST: "0.0.0.0"
+HOST: "127.0.0.1"
 PORT: 8000
 DEBUG: true
 SECRET_KEY: "dev-secret-key-change-in-production"
 ALLOWED_HOSTS: "*"
 
 DB_TYPE: "sqlite"
-DB_PATH: "db.sqlite"
-DB_NAME: "ext_service"
+DB_PATH: "development.sqlite"
+DB_NAME: "ext_service_dev"
 DB_USER: "postgres"
 DB_PASSWORD: "postgres"
 DB_HOST: "localhost"
@@ -31,6 +31,6 @@ CACHE_DEFAULT_TIMEOUT: 300
 
 METRICS_PORT: 8001
 
-API_TITLE: "ext-service API"
+API_TITLE: "ext-service API (Development)"
 API_VERSION: "1.0.0"
-API_DESCRIPTION: "A lightweight, flexible web service framework for building high-performance APIs, microservices and more"
+API_DESCRIPTION: "A lightweight, flexible web service for building high-performance APIs, microservices and more"
