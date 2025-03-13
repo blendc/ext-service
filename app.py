@@ -6,7 +6,7 @@ from datetime import datetime
 import peewee as pw
 
 from ext import JSONResponseRouter
-from core.auth import require_auth, require_roles, create_token
+# from core.auth import require_auth, require_roles, create_token
 from core.cache import cache_response
 from core.db import BaseModel, db_connection, create_tables
 from core.docs import document_route, api_docs
@@ -175,19 +175,19 @@ def openapi(req):
 @db_connection
 def register_user(req):
     data = req.data
-
+    
     if User.get_or_none(User.username == data.username):
         return response_ok({"error": "Username already exists"}, status=409)
-
+    
     if User.get_or_none(User.email == data.email):
         return response_ok({"error": "Email already exists"}, status=409)
-
+    
     user = User.create(
         username=data.username,
         email=data.email,
         password_hash=data.password,
     )
-
+    
     return response_created(UserSchema.serialize_one(user))
 
 
@@ -226,278 +226,39 @@ def register_user(req):
         401: "Invalid credentials",
     },
 )
-@db_connection
-def login(req):
-    data = req.data
 
-    user = User.get_or_none(User.username == data.username)
-
-    if not user or user.password_hash != data.password:
-        return response_ok({"error": "Invalid credentials"}, status=401)
-
-    token = create_token(user.id, roles=["user"])
-
-    return response_ok({
-        "token": token,
-        "user": {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-        },
-    })
-
-
-@router.get("/tasks")
-@metrics_middleware
-@require_auth
-@cache_response(timeout=60)
-@document_route(
-    summary="Get",
-    description="all tasks for the auth user",
-    tags=["tasks"],
-    response_schema={
-        "content_type": "application/json",
-        "schema": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "title": {"type": "string"},
-                    "description": {"type": "string", "nullable": True},
-                    "is_completed": {"type": "boolean"},
-                    "user_id": {"type": "integer"},
-                    "created_at": {"type": "string", "format": "date-time"},
-                    "updated_at": {"type": "string", "format": "date-time"},
-                },
-            },
-        },
-    },
-    status_codes={
-        200: "Success",
-        401: "Unauthorized",
-    },
-    security=[{"bearerAuth": []}],
-)
-@db_connection
-def get_tasks(req):
-    user_id = req.user_id
-
-    tasks = Task.select().where(Task.user_id == user_id)
-
-    return response_ok(TaskSchema.serialize_many(tasks))
-
-
-@router.post("/tasks")
-@metrics_middleware
-@require_auth
-@verify(task_schema)
-@document_route(
-    summary="Create",
-    description="new task for the auth user",
-    tags=["tasks"],
-    request_schema={
-        "content_type": "application/json",
-        "schema": task_schema,
-    },
-    response_schema={
-        "content_type": "application/json",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "title": {"type": "string"},
-                "description": {"type": "string", "nullable": True},
-                "is_completed": {"type": "boolean"},
-                "user_id": {"type": "integer"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "updated_at": {"type": "string", "format": "date-time"},
-            },
-        },
-    },
-    status_codes={
-        201: "Task created",
-        400: "Invalid request",
-        401: "Unauthorized",
-    },
-    security=[{"bearerAuth": []}],
-)
 @db_connection
 def create_task(req):
     data = req.data
-
+    
     user_id = req.user_id
-
+    
     task = Task.create(
         title=data.title,
         description=data.description,
         is_completed=data.is_completed,
         user_id=user_id,
     )
-
+    
     return response_created(TaskSchema.serialize_one(task))
 
 
-@router.get("/tasks/{task_id}")
-@metrics_middleware
-@require_auth
-@cache_response(timeout=60)
-@document_route(
-    summary="Get",
-    description="a task by ID",
-    tags=["tasks"],
-    response_schema={
-        "content_type": "application/json",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "title": {"type": "string"},
-                "description": {"type": "string", "nullable": True},
-                "is_completed": {"type": "boolean"},
-                "user_id": {"type": "integer"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "updated_at": {"type": "string", "format": "date-time"},
-            },
-        },
-    },
-    status_codes={
-        200: "Success",
-        401: "Unauthorized",
-        404: "Task not found",
-    },
-    security=[{"bearerAuth": []}],
-)
 @db_connection
 def get_task(req, task_id):
     user_id = req.user_id
-
+    
     task = Task.get_or_none(Task.id == task_id, Task.user_id == user_id)
-
+    
     if not task:
         return response_ok({"error": "Task not found"}, status=404)
-
+    
     return response_ok(TaskSchema.serialize_one(task))
 
 
-@router.put("/tasks/{task_id}")
-@metrics_middleware
-@require_auth
-@verify(task_schema)
-@document_route(
-    summary="Update",
-    description="a task by ID",
-    tags=["tasks"],
-    request_schema={
-        "content_type": "application/json",
-        "schema": task_schema,
-    },
-    response_schema={
-        "content_type": "application/json",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "title": {"type": "string"},
-                "description": {"type": "string", "nullable": True},
-                "is_completed": {"type": "boolean"},
-                "user_id": {"type": "integer"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "updated_at": {"type": "string", "format": "date-time"},
-            },
-        },
-    },
-    status_codes={
-        200: "Task updated",
-        400: "Invalid request",
-        401: "Unauthorized",
-        404: "Task not found",
-    },
-    security=[{"bearerAuth": []}],
-)
-@db_connection
-def update_task(req, task_id):
-    data = req.data
-
-    user_id = req.user_id
-
-    task = Task.get_or_none(Task.id == task_id, Task.user_id == user_id)
-
-    if not task:
-        return response_ok({"error": "Task not found"}, status=404)
-
-    task.title = data.title
-    task.description = data.description
-    task.is_completed = data.is_completed
-    task.updated_at = datetime.now()
-    task.save()
-
-    return response_ok(TaskSchema.serialize_one(task))
-
-
-@router.delete("/tasks/{task_id}")
-@metrics_middleware
-@require_auth
-@document_route(
-    summary="Delete",
-    description="a task by ID",
-    tags=["tasks"],
-    status_codes={
-        204: "Task deleted",
-        401: "Unauthorized",
-        404: "Task not found",
-    },
-    security=[{"bearerAuth": []}],
-)
-@db_connection
-def delete_task(req, task_id):
-    user_id = req.user_id
-
-    task = Task.get_or_none(Task.id == task_id, Task.user_id == user_id)
-
-    if not task:
-        return response_ok({"error": "Task not found"}, status=404)
-
-    task.delete_instance()
-
-    return response_no_content()
-
-
-@router.get("/admin/users")
-@metrics_middleware
-@require_roles(["admin"])
-@document_route(
-    summary="Get all",
-    description="(admin only)",
-    tags=["admin"],
-    response_schema={
-        "content_type": "application/json",
-        "schema": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "username": {"type": "string"},
-                    "email": {"type": "string"},
-                    "is_active": {"type": "boolean"},
-                    "created_at": {"type": "string", "format": "date-time"},
-                    "updated_at": {"type": "string", "format": "date-time"},
-                },
-            },
-        },
-    },
-    status_codes={
-        200: "Success",
-        401: "Unauthorized",
-        403: "Forbidden",
-    },
-    security=[{"bearerAuth": []}],
-)
 @db_connection
 def get_all_users(req):
     users = User.select()
-
+    
     return response_ok(UserSchema.serialize_many(users))
 
 
@@ -517,29 +278,36 @@ def get_all_users(req):
 def init_db():
     create_tables(User, Task)
 
-
 #     create_admin_user()
 
 
 def main():
+    """Run the application."""
     print("Starting ext-service application...")
+    
+    # Initialize database
     print("Initializing database...")
     init_db()
     print("Database initialized successfully!")
+
+    # Set up metrics
     print("Setting up metrics...")
-    setup_metrics(port=8001)
+    metrics_port = settings.METRICS_PORT
+    setup_metrics(port=metrics_port)
     print("Metrics setup complete!")
-
+    
+    # Run server
     from wsgiref.simple_server import make_server
-
+    
     host = settings.HOST
     port = settings.PORT
-
+    
     print(f"Starting server at http://{host}:{port}")
     print(f"API documentation available at http://{host}:{port}/docs")
-    print(f"Metrics available at http://{host}:8001")
+    print(f"Metrics available at http://{host}:{metrics_port}")
+    print(f"RPC endpoint available at http://{host}:{port}/rpc")
     print("\nPress Ctrl+C to stop the server")
-
+    
     try:
         server = make_server(host, port, router.app)
         server.serve_forever()

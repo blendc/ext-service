@@ -24,5 +24,6 @@ aiohttp
 uvicorn
 sentry-sdk
 prometheus-client
+# httpx
 
 

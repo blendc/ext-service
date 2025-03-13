@@ -14,8 +14,6 @@ logger = logging.getLogger(__name__)
 __all__ = (
     "cache",
     "cache_response",
-    "invalidate_cache",
-    "clear_cache",
 )
 
 try:
@@ -164,24 +162,3 @@ def cache_response(timeout: Optional[int] = None, vary_headers: Tuple[str, ...] 
     
     return decorator
 
-
-def invalidate_cache(pattern: str) -> int:
-    if redis_client is None:
-        return 0
-    
-    keys = redis_client.keys(f"*{pattern}*")
-    if not keys:
-        return 0
-    
-    return redis_client.delete(*keys)
-
-
-def clear_cache() -> int:
-    if redis_client is None:
-        return 0
-    
-    keys = redis_client.keys("cache:*") + redis_client.keys("response:*")
-    if not keys:
-        return 0
-    
-    return redis_client.delete(*keys) 
